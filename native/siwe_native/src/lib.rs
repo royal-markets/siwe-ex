@@ -182,7 +182,7 @@ fn generate_nonce() -> String {
 }
 
 rustler::init!(
-    "Elixir.Siwe",
+    "Elixir.Siwe.Native",
     [
         parse,
         to_str,
