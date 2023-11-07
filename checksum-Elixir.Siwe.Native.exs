@@ -1,9 +1,11 @@
 %{
-  "libsiwe_native-v0.6.0-nif-2.15-aarch64-apple-darwin.so.tar.gz" => "sha256:747aa6e6da37b3c34b4e5d83ffe90cc9e98be2c471ac408dae18b555569e019d",
-  "libsiwe_native-v0.6.0-nif-2.15-aarch64-unknown-linux-gnu.so.tar.gz" => "sha256:fff21f2bd5f22474168bffdcc577d47dcdc8894b59cb747cbc3d09144ed64dc0",
-  "libsiwe_native-v0.6.0-nif-2.15-arm-unknown-linux-gnueabihf.so.tar.gz" => "sha256:8fed75d9d3646aa030459e52d9959acdfccd226ed2279e9aaf5144ed1f1139cd",
-  "libsiwe_native-v0.6.0-nif-2.15-x86_64-apple-darwin.so.tar.gz" => "sha256:ab5bab28d02d3a3a8d7a4bf555e9948aee5685d658539a670d75886f8ff5cf1e",
-  "libsiwe_native-v0.6.0-nif-2.15-x86_64-unknown-linux-gnu.so.tar.gz" => "sha256:4d6a585a75d9d018fdf4cc3b89e3b4d9621275fb17379037dbdb38bebfc6eb61",
-  "siwe_native-v0.6.0-nif-2.15-x86_64-pc-windows-gnu.dll.tar.gz" => "sha256:0748d6624381153b1a83b785e0b1fcb1028477d09286efa73e69fd3369f15678",
-  "siwe_native-v0.6.0-nif-2.15-x86_64-pc-windows-msvc.dll.tar.gz" => "sha256:2676fb44ff1f76969d2484632d5eb4784f56da083e8089d1a1b41f4f821e0609",
+  "libsiwe_native-v0.6.0-nif-2.15-aarch64-apple-darwin.so.tar.gz" => "sha256:17873659c4a6e61a6c854871c4acf06dfae71be030bc44fa4c66150f5c903761",
+  "libsiwe_native-v0.6.0-nif-2.15-aarch64-unknown-linux-gnu.so.tar.gz" => "sha256:c68a306debe898193e20cee7507906f7da148a76142bbba950b7a8310bbab889",
+  "libsiwe_native-v0.6.0-nif-2.15-aarch64-unknown-linux-musl.so.tar.gz" => "sha256:df81e4bdde1ecec4abdc594f374b783cb688f609cd8a515f01fa2fc45a7c9b0f",
+  "libsiwe_native-v0.6.0-nif-2.15-arm-unknown-linux-gnueabihf.so.tar.gz" => "sha256:eab3ac3918eda964b7997c9a452b2e5af9f7fe8f801b4a647e1510544e2e0045",
+  "libsiwe_native-v0.6.0-nif-2.15-x86_64-apple-darwin.so.tar.gz" => "sha256:529a38f34a8de5c1bfc8a08ea65d25f149260b015e499e15df821291c4984041",
+  "libsiwe_native-v0.6.0-nif-2.15-x86_64-unknown-linux-gnu.so.tar.gz" => "sha256:549ad7ef3d830192a87c93a3411497f85bd277ccda5c28846119026762dcd4b2",
+  "libsiwe_native-v0.6.0-nif-2.15-x86_64-unknown-linux-musl.so.tar.gz" => "sha256:80e0c795836bebf3182ba9a069d05c2aa269d32aa6f58316195f415b852d3952",
+  "siwe_native-v0.6.0-nif-2.15-x86_64-pc-windows-gnu.dll.tar.gz" => "sha256:213190d2d8010d01e99d0960759b762314d37b967598e1b582e1feff69a19b74",
+  "siwe_native-v0.6.0-nif-2.15-x86_64-pc-windows-msvc.dll.tar.gz" => "sha256:af0b04c2cf312a01f6146860733a58fbd92211e613f05d109721a7c85146d38d",
 }
