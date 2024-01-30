@@ -8,13 +8,13 @@ defmodule Siwe do
   @doc """
   Parses a Sign In With Ethereum message string into the Message struct, or reports an error
   """
-  @spec parse(String.t()) :: {:ok | :error, Message.t() | String.t()}
+  @spec parse(String.t()) :: {:ok, Message.t()} | {:error, String.t()}
   defdelegate parse(msg), to: Native
 
   @doc """
   Converts a Message struct to a Sign In With Ethereum message string, or reports an error
   """
-  @spec to_str(Message.t()) :: {:ok | :error, String.t()}
+  @spec to_str(Message.t()) :: {:ok, String.t()} | {:error, String.t()}
   defdelegate to_str(msg), to: Native
 
   @doc """
@@ -34,9 +34,9 @@ defmodule Siwe do
   @spec verify(
           Message.t(),
           String.t(),
-          String.t() | nil.t(),
-          String.t() | nil.t(),
-          String.t() | nil.t()
+          String.t() | nil,
+          String.t() | nil,
+          String.t() | nil
         ) :: boolean()
   defdelegate verify(msg, sig, domain_binding, match_nonce, timestamp), to: Native
 
@@ -59,9 +59,9 @@ defmodule Siwe do
     ...> "Issued At: 2021-12-17T00:38:39.834Z",
     ...> ], "\\n"),
     ...> "0x8d1327a1abbdf172875e5be41706c50fc3bede8af363b67aefbb543d6d082fb76a22057d7cb6d668ceba883f7d70ab7f1dc015b76b51d226af9d610fa20360ad1c")
-    {:ok, %{ __struct__: Siwe, address: "0xfA151B5453CE69ABf60f0dbdE71F6C9C5868800E", chain_id: 1, domain: "login.xyz", expiration_time: nil, issued_at: "2021-12-17T00:38:39.834Z", nonce: "ToTaLLyRanDOM", not_before: nil, request_id: nil, resources: [], statement: "Sign-In With Ethereum Example Statement", uri: "https://login.xyz", version: "1" }}
+    {:ok, %Siwe.Message{ address: "0xfA151B5453CE69ABf60f0dbdE71F6C9C5868800E", chain_id: 1, domain: "login.xyz", expiration_time: nil, issued_at: "2021-12-17T00:38:39.834Z", nonce: "ToTaLLyRanDOM", not_before: nil, request_id: nil, resources: [], statement: "Sign-In With Ethereum Example Statement", uri: "https://login.xyz", version: "1" }}
   """
-  @spec parse_if_valid(String.t(), String.t()) :: {:ok | :error, Message.t() | String.t()}
+  @spec parse_if_valid(String.t(), String.t()) :: {:ok, Message.t()} | {:error, String.t()}
   defdelegate parse_if_valid(msg, sig), to: Native
 
   @doc """
