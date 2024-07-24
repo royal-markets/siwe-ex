@@ -1,15 +1,17 @@
-use chrono::{DateTime, Utc};
-use ethers_core::{types::H160, utils::to_checksum};
-use hex::FromHex;
+use alloy::primitives::{
+    hex::{self, FromHex},
+    Address,
+};
 use http::uri::Authority;
 use iri_string::types::UriString;
-use rand::distributions::Alphanumeric;
-use rand::{thread_rng, Rng};
-use rustler::NifStruct;
-use siwe::{Message, TimeStamp, Version};
+use rustler::{types::atom::ok, Atom, Encoder, Env, NifStruct, OwnedEnv};
+use siwe::{Message, TimeStamp, VerificationOpts, Version};
 use std::str::FromStr;
+use time::{format_description::well_known::Rfc3339, OffsetDateTime};
 
-#[derive(NifStruct)]
+mod runtime;
+
+#[derive(Debug, NifStruct)]
 #[module = "Siwe.Message"]
 pub struct Parsed {
     pub domain: String,
@@ -24,6 +26,35 @@ pub struct Parsed {
     pub not_before: Option<String>,
     pub request_id: Option<String>,
     pub resources: Vec<String>,
+}
+
+#[derive(Debug, NifStruct)]
+#[module = "Siwe.VerifyOptions"]
+pub struct VerifyOptions {
+    pub domain: Option<String>,
+    pub nonce: Option<String>,
+    pub timestamp: Option<String>,
+    pub rpc_url: Option<String>,
+}
+
+impl Into<VerificationOpts> for VerifyOptions {
+    fn into(self) -> VerificationOpts {
+        VerificationOpts {
+            domain: self
+                .domain
+                .map(|domain| Authority::from_str(&domain).ok())
+                .flatten(),
+            nonce: self.nonce,
+            timestamp: self
+                .timestamp
+                .map(|timestamp| OffsetDateTime::parse(&timestamp, &Rfc3339).ok())
+                .flatten(),
+            rpc_provider: self.rpc_url.map(|rpc_url| {
+                let rpc_url = rpc_url.parse().unwrap();
+                alloy::providers::ProviderBuilder::new().on_http(rpc_url)
+            }),
+        }
+    }
 }
 
 impl Parsed {
@@ -83,7 +114,7 @@ fn version_string(v: Version) -> String {
 fn message_to_parsed(m: Message) -> Parsed {
     Parsed {
         domain: m.domain.to_string(),
-        address: to_checksum(&H160(m.address.into()), None),
+        address: Address::new(m.address).to_checksum(None),
         statement: m.statement,
         uri: m.uri.to_string(),
         version: version_string(m.version),
@@ -113,82 +144,61 @@ fn to_str(message: Parsed) -> Result<String, String> {
 }
 
 #[rustler::nif]
-fn verify_sig(message: Parsed, sig: String) -> bool {
-    match message.to_eip4361_message() {
-        Ok(m) => match <[u8; 65]>::from_hex(sig.chars().skip(2).collect::<String>()) {
-            Ok(s) => m.verify_eip191(&s).is_ok(),
+fn verify(env: Env, message: Parsed, sig: String, opts: VerifyOptions) -> Atom {
+    let caller = env.pid();
+    let opts: VerificationOpts = opts.into();
+
+    runtime::spawn(async move {
+        let result = match message.to_eip4361_message() {
+            Ok(m) => match hex::decode(sig) {
+                Ok(s) => m.verify(&s.to_vec(), &opts).await.is_ok(),
+                Err(_) => false,
+            },
             Err(_) => false,
-        },
-        Err(_) => false,
-    }
+        };
+
+        let _ = OwnedEnv::new().send_and_clear(&caller, move |env| result.encode(env));
+    });
+
+    ok()
 }
 
 #[rustler::nif]
-fn verify(
-    message: Parsed,
-    sig: String,
-    domain_binding: Option<String>,
-    match_nonce: Option<String>,
-    timestamp: Option<String>,
-) -> bool {
-    match message.to_eip4361_message() {
-        Ok(m) => match <[u8; 65]>::from_hex(sig.chars().skip(2).collect::<String>()) {
-            Ok(s) => m
-                .verify(
-                    s,
-                    domain_binding
-                        .and_then(|domain_binding| Authority::from_str(&domain_binding).ok())
-                        .as_ref(),
-                    match_nonce.as_ref().map(|x| x as _),
-                    timestamp
-                        .and_then(|timestamp| DateTime::<Utc>::from_str(&timestamp).ok())
-                        .as_ref(),
-                )
-                .is_ok(),
-            Err(_) => false,
-        },
-        Err(_) => false,
-    }
-}
+fn parse_if_valid(env: Env, message: String, sig: String, opts: VerifyOptions) -> Atom {
+    let caller = env.pid();
+    let opts: VerificationOpts = opts.into();
 
-#[rustler::nif]
-fn parse_if_valid(message: String, sig: String) -> Result<Parsed, String> {
-    let s = <[u8; 65]>::from_hex(sig.chars().skip(2).collect::<String>())
-        .map_err(|e| format!("Failed to convert sig to bytes: {}", e))?;
+    runtime::spawn(async move {
+        let result: Result<Parsed, String> = async {
+            let s = <[u8; 65]>::from_hex(sig.chars().skip(2).collect::<String>())
+                .map_err(|e| format!("Failed to convert sig to bytes: {}", e))?;
 
-    match Message::from_str(&message) {
-        Err(e) => Err(e.to_string()),
-        Ok(m) => match m.verify_eip191(&s) {
-            Ok(_) => {
-                if m.valid_now() {
-                    Ok(message_to_parsed(m))
-                } else {
-                    Err("Invalid time".to_string())
-                }
+            match Message::from_str(&message) {
+                Err(e) => Err(e.to_string()),
+                Ok(m) => match m.verify(&s, &opts).await {
+                    Ok(_) => {
+                        if m.valid_now() {
+                            Ok(message_to_parsed(m))
+                        } else {
+                            Err("Invalid time".to_string())
+                        }
+                    }
+
+                    Err(e) => Err(e.to_string()),
+                },
             }
+        }
+        .await;
 
-            Err(e) => Err(e.to_string()),
-        },
-    }
+        let _ = OwnedEnv::new().send_and_clear(&caller, move |env| result.encode(env));
+    });
+
+    ok()
 }
 
 #[rustler::nif]
 fn generate_nonce() -> String {
-    thread_rng()
-        .sample_iter(&Alphanumeric)
-        .take(11)
-        .map(char::from)
-        .collect()
+    siwe::generate_nonce()
 }
 
-rustler::init!(
-    "Elixir.Siwe.Native",
-    [
-        parse,
-        to_str,
-        verify_sig,
-        verify,
-        parse_if_valid,
-        generate_nonce
-    ]
-);
+rustler::init!("Elixir.Siwe.Native", load = runtime::load);

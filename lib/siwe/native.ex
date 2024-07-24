@@ -21,13 +21,13 @@ defmodule Siwe.Native do
       "x86_64-unknown-linux-gnu",
       "x86_64-unknown-linux-musl"
     ],
+    load_data_fun: {Siwe, :configure_async_runtime!},
     version: version
 
   def parse(_msg), do: nif_error()
   def to_str(_msg), do: nif_error()
-  def verify_sig(_msg, _sig), do: nif_error()
-  def verify(_msg, _sig, _domain_binding, _match_nonce, _timestamp), do: nif_error()
-  def parse_if_valid(_msg, _sig), do: nif_error()
+  def verify(_msg, _sig, _opts), do: nif_error()
+  def parse_if_valid(_msg, _sig, _opts), do: nif_error()
   def generate_nonce, do: nif_error()
 
   defp nif_error, do: :erlang.nif_error(:nif_not_loaded)
