@@ -4,7 +4,7 @@ defmodule Siwe.MixProject do
   @description "Elixir library to parse and validate Sign In with Ethereum Messages"
   @organization "Spruce Systems, Inc."
   @source_url "https://github.com/spruceid/siwe-ex"
-  @version "0.6.0"
+  @version "0.7.0"
 
   def application, do: [extra_applications: [:logger]]
 

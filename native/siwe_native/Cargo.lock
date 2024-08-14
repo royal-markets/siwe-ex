@@ -3416,7 +3416,7 @@ dependencies = [
 [[package]]
 name = "siwe"
 version = "0.6.1"
-source = "git+https://github.com/royal-markets/siwe-rs?branch=alloy#bf8f7999c4e0982abf279987f91d773b13152f8a"
+source = "git+https://github.com/royal-markets/siwe-rs#a082d32f5b87f198b9a0af155e429d61370d2eb9"
 dependencies = [
  "alloy",
  "eth-signature-verifier",

@@ -15,6 +15,6 @@ http = "1.0.0"
 iri-string = { version = "0.7", features = ["serde"] }
 once_cell = "1.19.0"
 rustler = "0.34"
-siwe = { git = "https://github.com/royal-markets/siwe-rs", features = ["alloy"], branch = "alloy" }
+siwe = { git = "https://github.com/royal-markets/siwe-rs", features = ["alloy"], ref = "a082d32" }
 time = { version = "0.3", features = ["parsing", "formatting"] }
 tokio = { version = "1.39.1", features = ["rt-multi-thread"] }
